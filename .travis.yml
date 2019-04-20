@@ -1,0 +1,15 @@
+language: go
+go: "1.12"
+env:
+  GO111MODULE=on
+services:
+  - docker
+go_import_path: github.com/trinchan/saiki
+script: make ci
+
+deploy:
+  provider: script
+  script: bash ./hack/push_image.sh
+  on:
+    branch: master
+    tags: true
