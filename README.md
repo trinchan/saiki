@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/trinchan/saiki.svg?branch=master)](https://travis-ci.org/trinchan/saiki)
 [![Docker Repository on Quay](https://quay.io/repository/trinchan/saiki/status "Docker Repository on Quay")](https://quay.io/repository/trinchan/saiki)
 
 _documentation and tests to come_
