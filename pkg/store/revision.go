@@ -111,6 +111,7 @@ func (c *ConcreteRevision) MarshalJSON() ([]byte, error) {
 
 type LazyLoadingRevision struct {
 	revision
+	ctx     context.Context
 	once    *sync.Once
 	content *unstructured.Unstructured
 	s       Storer
@@ -156,7 +157,7 @@ func (l *LazyLoadingRevision) Content() (*unstructured.Unstructured, error) {
 	var err error
 	l.once.Do(func() {
 		var rev Revision
-		rev, err = l.s.Revisions(l.Namespace()).Get(context.TODO(), l)
+		rev, err = l.s.Revisions(l.Namespace()).Get(l.ctx, l)
 		if err != nil {
 			// reset the once so we can try again
 			l.once = new(sync.Once)
@@ -172,7 +173,7 @@ func (l *LazyLoadingRevision) Content() (*unstructured.Unstructured, error) {
 	return l.content, err
 }
 
-func ParseLazyLoadingRevision(s Storer, path string) (*LazyLoadingRevision, error) {
+func ParseLazyLoadingRevision(ctx context.Context, s Storer, path string) (*LazyLoadingRevision, error) {
 	split := strings.Split(path, "/")
 	depth := len(split)
 	if depth == 0 {
@@ -190,6 +191,7 @@ func ParseLazyLoadingRevision(s Storer, path string) (*LazyLoadingRevision, erro
 			return nil, err
 		}
 		return &LazyLoadingRevision{
+			ctx:      ctx,
 			revision: r,
 			once:     new(sync.Once),
 			s:        s,
@@ -200,6 +202,7 @@ func ParseLazyLoadingRevision(s Storer, path string) (*LazyLoadingRevision, erro
 			return nil, err
 		}
 		return &LazyLoadingRevision{
+			ctx:      ctx,
 			revision: r,
 			once:     new(sync.Once),
 			s:        s,

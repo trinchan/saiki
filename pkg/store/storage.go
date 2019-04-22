@@ -194,7 +194,7 @@ func (s *RevisionStore) State(ctx context.Context, o StateOptions) (State, error
 
 		key := strings.TrimPrefix(path, "/")
 
-		rev, err := ParseLazyLoadingRevision(s, key)
+		rev, err := ParseLazyLoadingRevision(ctx, s, key)
 		if err != nil {
 			return err
 		}
@@ -269,7 +269,7 @@ func (s *RevisionStore) Sync(ctx context.Context, handlers handler.ResourceHandl
 			return nil
 		}
 		key := strings.TrimPrefix(path, "/")
-		rev, err := ParseLazyLoadingRevision(s, key)
+		rev, err := ParseLazyLoadingRevision(ctx, s, key)
 		if err != nil {
 			return errors.Wrapf(err, "error parsing lazy revision from informer store: %s", key)
 		}
@@ -436,7 +436,7 @@ func (s *revisionNamespaceStore) List(ctx context.Context, tm metav1.TypeMeta, n
 	klog.V(5).Infof("read dir: %s - %+v", resourceKey, infos)
 	var revisions RevisionList
 	for i := range infos {
-		r, err := ParseLazyLoadingRevision(s.s, RevisionKey(resourceKey, infos[i].Name()))
+		r, err := ParseLazyLoadingRevision(ctx, s.s, RevisionKey(resourceKey, infos[i].Name()))
 		if err != nil {
 			return nil, err
 		}
@@ -499,7 +499,7 @@ func (p *revisionPurger) PurgeRevisions(ctx context.Context, revs RevisionList) 
 		klog.V(2).Infof("bulk purging backend")
 		deletedKeys, err := bulkRemovingBackend.RemoveAll(ctx, keys)
 		for _, deletedKey := range deletedKeys {
-			rev, err := ParseLazyLoadingRevision(p.s, deletedKey)
+			rev, err := ParseLazyLoadingRevision(ctx, p.s, deletedKey)
 			if err != nil {
 				klog.Warningf("could not parse revision in bulk remove response: %s", deletedKey)
 				continue
@@ -516,7 +516,7 @@ func (p *revisionPurger) PurgeRevisions(ctx context.Context, revs RevisionList) 
 			klog.Warningf("error purging revision: %s - %v", key, err)
 			continue
 		}
-		rev, err := ParseLazyLoadingRevision(p.s, key)
+		rev, err := ParseLazyLoadingRevision(ctx, p.s, key)
 		if err != nil {
 			klog.Warningf("could not parse revision: %s - %v", key, err)
 			continue
