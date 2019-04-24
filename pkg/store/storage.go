@@ -317,6 +317,7 @@ func (s *RevisionStore) get(ctx context.Context, filepath string) (Revision, err
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	var data []byte
 	if s.encrypter != nil {
 		data, err = s.encrypter.Decrypt(f)
