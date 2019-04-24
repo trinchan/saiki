@@ -332,7 +332,8 @@ func (o *operator) syncStore() error {
 	klog.Infof("found %d objects in store", len(state))
 	klog.Infof("found %d stale objects to delete", len(revsToDelete))
 	for _, rev := range revsToDelete {
-		o.purger.Queue(rev)
+		rev.SetDeleted(true)
+		o.flusher.Queue(rev)
 	}
 	return nil
 }
@@ -534,8 +535,9 @@ func (o *operator) processUnstructured(obj interface{}) bool {
 
 	// try to use the old value from the watch, fallback to reading from the store
 	if old == nil {
+		var err error
 		klog.V(4).Infof("old is nil, will fetch from store: %s", u)
-		old, err := o.store.Revisions(u.Namespace()).Get(o.ctx, u)
+		old, err = o.store.Revisions(u.Namespace()).Get(o.ctx, u)
 		if old == nil || err != nil {
 			klog.V(4).Infof("error getting stored item, will store new revision: %v", err)
 		}
