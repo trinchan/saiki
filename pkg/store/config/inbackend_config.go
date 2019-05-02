@@ -39,6 +39,7 @@ func (s *inBackend) ReadConfig(ctx context.Context) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	config := new(Config)
 	err = json.NewDecoder(f).Decode(config)
 	return config, err
